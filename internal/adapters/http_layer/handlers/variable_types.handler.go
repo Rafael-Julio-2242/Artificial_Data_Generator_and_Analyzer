@@ -8,14 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Aqui eu preciso definir os tipos de dados das variáveis / colunas
-// Preciso definir se são:
-//	Qualitativa Nominal - Texto normal sem hierarquia
-//	Qualitativa Ordinal - Texto com algum tipo de Hierarquia (menor valor, maior valor)
-//	Quantitativa Discreta - Números inteiros
-//	Quantitativa Contínua - Números com pontos flutuantes
-
-func DefineVariableTypes(context *gin.Context) { // TODO Ainda preciso ajustar isso
+func DefineVariableTypes(context *gin.Context) {
 
 	fileHeader, err := context.FormFile("file")
 
@@ -64,10 +57,6 @@ func DefineVariableTypes(context *gin.Context) { // TODO Ainda preciso ajustar i
 			context.JSON(400, gin.H{"message": "mimetype does not correspond to file suffix!"})
 			return
 		}
-
-		// Depois posso fazer uma verificação de bytes, por enquanto isso é suficiente
-
-		// Aqui eu preciso fazer a verificação de tipos, definir quais os tipos de variáveis
 
 		defineVariableTypesServiceSv, ok := context.Get(services.DefineVariableTypesServiceKey)
 

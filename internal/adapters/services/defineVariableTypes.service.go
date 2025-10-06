@@ -22,6 +22,7 @@ func NewDefineVariableTypesService(aiClient *genai.Client, ctx context.Context) 
 }
 
 func (s *DefineVariableTypesService) DefineVariableTypes(data map[string][]string) (map[string][]any, error) {
+	// TODO Falta apenas validar se a classificação é binária
 	fixedData, err := s.fixDataTyping(data)
 	resultData := make(map[string][]any, len(fixedData))
 
@@ -40,8 +41,40 @@ func (s *DefineVariableTypesService) DefineVariableTypes(data map[string][]strin
 		switch any(value).(type) {
 		case int64:
 			keyValue := fmt.Sprintf("%v_type", header)
-			value := []any{"Quantitativa Discreta"}
-			resultData[keyValue] = value
+
+			// Antes de definir como discreta, existe a possibilidade de ser binária.
+			// Tenho que validar valor a valor pra descobrir isso
+
+			value1 := values[0]
+			var value2 int64
+			isBinary := true
+
+			for _, value := range values {
+				intValue, ok := value.(int64)
+
+				if !ok {
+					return nil, fmt.Errorf("malformed data for header %q - %d", header, err)
+				}
+
+				if value1 != intValue && value2 == 0 {
+					value2 = intValue
+					continue
+				}
+
+				if value2 != 0 && value1 != intValue && value2 != intValue {
+					isBinary = false
+					break
+				}
+
+			}
+
+			if isBinary {
+				value := []any{"Binária"}
+				resultData[keyValue] = value
+			} else {
+				value := []any{"Quantitativa Discreta"}
+				resultData[keyValue] = value
+			}
 		case float64:
 			keyValue := fmt.Sprintf("%v_type", header)
 			value := []any{"Quantitativa Contínua"}
