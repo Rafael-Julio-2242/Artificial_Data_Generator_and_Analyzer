@@ -53,7 +53,7 @@ func (s *DefineVariableTypesService) DefineVariableTypes(data map[string][]strin
 				intValue, ok := value.(int64)
 
 				if !ok {
-					return nil, fmt.Errorf("malformed data for header %q - %d", header, err)
+					continue
 				}
 
 				if value1 != intValue && value2 == 0 {
@@ -118,11 +118,11 @@ func (s *DefineVariableTypesService) fixDataTyping(data map[string][]string) (ma
 			parsed := make([]any, len(values))
 			for index, value := range values {
 				intValue, err := strconv.ParseInt(value, 10, 64)
-
+				var anyValue any = intValue
 				if err != nil {
-					return nil, fmt.Errorf("malformed data for header %q at index %d: %w", header, index, err)
+					anyValue = ""
 				}
-				parsed[index] = intValue
+				parsed[index] = anyValue
 			}
 			resultDataSet[header] = parsed
 			continue
@@ -136,10 +136,11 @@ func (s *DefineVariableTypesService) fixDataTyping(data map[string][]string) (ma
 			parsed := make([]any, len(values))
 			for index, value := range values {
 				floatValue, err := strconv.ParseFloat(value, 64)
+				var anyValue any = floatValue
 				if err != nil {
-					return nil, fmt.Errorf("malformed data for header %q at index %d: %w", header, index, err)
+					anyValue = ""
 				}
-				parsed[index] = floatValue
+				parsed[index] = anyValue
 			}
 			resultDataSet[header] = parsed
 			continue

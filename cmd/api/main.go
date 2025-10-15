@@ -30,10 +30,12 @@ func main() {
 
 	fileParser := fileops.NewFileParser()
 	defineVariableTypesService := services.NewDefineVariableTypesService(aiClient, ctx)
+	dataCleaningService := services.NewDataCleaningService()
 
 	server := httplayer.GetHttpServer(
 		middlewares.InjectFileParserMiddleware(fileParser),
 		middlewares.InjectDefineVariableTypesMiddleware(defineVariableTypesService),
+		middlewares.InjectDataCleaningMiddleware(dataCleaningService),
 	)
 
 	server.Run(":8080")

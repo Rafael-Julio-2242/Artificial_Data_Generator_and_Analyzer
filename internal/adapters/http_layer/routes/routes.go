@@ -8,4 +8,5 @@ import (
 
 func RegisterRoutes(server *gin.Engine) {
 	server.POST("/define-variable-types", handlers.DefineVariableTypes)
+	server.POST("/data-cleaning", handlers.DataCleaning)
 }
