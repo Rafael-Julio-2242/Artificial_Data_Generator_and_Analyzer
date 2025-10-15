@@ -33,11 +33,6 @@ func DefineVariableTypes(context *gin.Context) {
 
 	fileParser := fileParserSv.(ports.FileParser)
 
-	if err != nil {
-		context.JSON(500, gin.H{"message": "error getting file parser"})
-		return
-	}
-
 	fname := fileHeader.Filename
 	mtype := fileHeader.Header.Get("Content-Type")
 
