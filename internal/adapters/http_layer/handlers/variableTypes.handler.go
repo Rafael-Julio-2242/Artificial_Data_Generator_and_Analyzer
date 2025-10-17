@@ -3,7 +3,6 @@ package handlers
 import (
 	"artificial-data-analyzer-generation/internal/domain/ports"
 	"artificial-data-analyzer-generation/internal/domain/services"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -38,76 +37,29 @@ func DefineVariableTypes(context *gin.Context) {
 
 	defer file.Close()
 
-	switch mtype {
-	case "text/csv":
-		data, err := fileParser.ConvertFileToData(&file, "csv")
-		if err != nil {
-			context.JSON(500, gin.H{"message": "error converting file to data"})
-			return
-		}
+	data, err := fileParser.ConvertFileToData(&file, mtype, fname)
 
-		isCsv := strings.HasSuffix(fname, ".csv")
-
-		if !isCsv {
-			context.JSON(400, gin.H{"message": "mimetype does not correspond to file suffix!"})
-			return
-		}
-
-		defineVariableTypesServiceSv, ok := context.Get(services.DefineVariableTypesServiceKey)
-
-		if !ok {
-			context.JSON(500, gin.H{"message": "error getting define variable types service"})
-			return
-		}
-
-		defineVariableTypesService := defineVariableTypesServiceSv.(services.DefineVariableTypesService)
-
-		fixedData, err := defineVariableTypesService.DefineVariableTypes(data)
-
-		if err != nil {
-			context.JSON(500, gin.H{"message": "error defining variable types: " + err.Error()})
-			return
-		}
-
-		context.JSON(200, gin.H{"data": fixedData})
-		return
-	case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
-		data, err := fileParser.ConvertFileToData(&file, "xlsx")
-		if err != nil {
-			context.JSON(500, gin.H{"message": "error converting file to data"})
-			return
-		}
-
-		isXlsx := strings.HasSuffix(fname, ".xlsx")
-
-		if !isXlsx {
-			context.JSON(400, gin.H{"message": "mimetype does not correspond to file suffix!"})
-			return
-		}
-
-		// Depois posso fazer uma verificação de bytes
-
-		defineVariableTypesServiceSv, ok := context.Get(services.DefineVariableTypesServiceKey)
-
-		if !ok {
-			context.JSON(500, gin.H{"message": "error getting define variable types service"})
-			return
-		}
-
-		defineVariableTypesService := defineVariableTypesServiceSv.(services.DefineVariableTypesService)
-
-		fixedData, err := defineVariableTypesService.DefineVariableTypes(data)
-
-		if err != nil {
-			context.JSON(500, gin.H{"message": "error defining variable types: " + err.Error()})
-			return
-		}
-
-		context.JSON(200, gin.H{"data": fixedData})
-		return
-	default:
-		context.JSON(400, gin.H{"message": "file type not supported"})
+	if err != nil {
+		context.JSON(500, gin.H{"message": "error converting file to data: " + err.Error()})
 		return
 	}
+
+	defineVariableTypesServiceSv, ok := context.Get(services.DefineVariableTypesServiceKey)
+
+	if !ok {
+		context.JSON(500, gin.H{"message": "error getting define variable types service"})
+		return
+	}
+
+	defineVariableTypesService := defineVariableTypesServiceSv.(services.DefineVariableTypesService)
+
+	fixedData, err := defineVariableTypesService.DefineVariableTypes(data)
+
+	if err != nil {
+		context.JSON(500, gin.H{"message": "error defining variable types: " + err.Error()})
+		return
+	}
+
+	context.JSON(200, gin.H{"data": fixedData})
 
 }

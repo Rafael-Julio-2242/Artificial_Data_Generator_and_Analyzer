@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"mime/multipart"
+	"strings"
 
 	"github.com/xuri/excelize/v2"
 )
@@ -16,7 +17,14 @@ func NewFileParser() *FileParser {
 	return &FileParser{}
 }
 
-func (f FileParser) handleCsvData(fileData *multipart.File) (map[string][]string, error) {
+func (f FileParser) handleCsvData(fileData *multipart.File, fname string) (map[string][]string, error) {
+
+	isCsv := strings.HasSuffix(fname, ".csv")
+
+	if !isCsv {
+		return nil, errors.New("mimetype does not correspond to file suffix")
+	}
+
 	dataMap := make(map[string][]string)
 
 	reader := csv.NewReader(*fileData)
@@ -48,7 +56,13 @@ func (f FileParser) handleCsvData(fileData *multipart.File) (map[string][]string
 	return dataMap, nil
 }
 
-func (f FileParser) handleXlsxData(fileData *multipart.File) (map[string][]string, error) {
+func (f FileParser) handleXlsxData(fileData *multipart.File, fname string) (map[string][]string, error) {
+
+	isXlsx := strings.HasSuffix(fname, ".xlsx")
+
+	if !isXlsx {
+		return nil, errors.New("mimetype does not correspond to file suffix")
+	}
 
 	reader, err := excelize.OpenReader(*fileData)
 	if err != nil {
@@ -94,26 +108,25 @@ func (f FileParser) handleXlsxData(fileData *multipart.File) (map[string][]strin
 	return dataMap, nil
 }
 
-func (f FileParser) handleJsonData(fileData *multipart.File) (map[string][]string, error) {
+func (f FileParser) handleJsonData(fileData *multipart.File, fname string) (map[string][]string, error) {
 	return nil, nil // TODO Implement
 }
 
-func (f FileParser) handleTsvData(fileData *multipart.File) (map[string][]string, error) {
+func (f FileParser) handleTsvData(fileData *multipart.File, fname string) (map[string][]string, error) {
 	return nil, nil // TODO Implement
 }
 
-func (f FileParser) ConvertFileToData(fileData *multipart.File, ext string) (map[string][]string, error) {
-
+func (f FileParser) ConvertFileToData(fileData *multipart.File, ext string, fname string) (map[string][]string, error) {
 	switch ext {
-	case "csv":
-		return f.handleCsvData(fileData)
-	case "xlsx":
-		return f.handleXlsxData(fileData)
-	case "json":
-		return f.handleJsonData(fileData)
-	case "tsv":
-		return f.handleTsvData(fileData)
+	case "text/csv":
+		return f.handleCsvData(fileData, fname)
+	case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+		return f.handleXlsxData(fileData, fname)
+	case "application/json":
+		return f.handleJsonData(fileData, fname)
+	case "text/tab-separated-values":
+		return f.handleTsvData(fileData, fname)
 	default:
-		return nil, errors.New("unsupported file")
+		return nil, errors.New("file type not supported")
 	}
 }

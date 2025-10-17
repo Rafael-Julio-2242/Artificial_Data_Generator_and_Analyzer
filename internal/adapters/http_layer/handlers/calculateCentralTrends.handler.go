@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func DataCleaning(context *gin.Context) {
+func CalculateCentralTrends(context *gin.Context) {
 	fileHeader, err := context.FormFile("file")
 
 	if err != nil {
@@ -59,5 +59,37 @@ func DataCleaning(context *gin.Context) {
 		return
 	}
 
-	context.JSON(200, gin.H{"data": cleanedData})
+	defineVariableTypesServiceSv, ok := context.Get(services.DefineVariableTypesServiceKey)
+
+	if !ok {
+		context.JSON(500, gin.H{"message": "error getting define variable types service"})
+		return
+	}
+
+	defineVariableTypesService := defineVariableTypesServiceSv.(services.DefineVariableTypesService)
+
+	fixedData, err := defineVariableTypesService.DefineVariableTypes(cleanedData)
+
+	if err != nil {
+		context.JSON(500, gin.H{"message": "error defining variable types: " + err.Error()})
+		return
+	}
+
+	calculateCentralTrendsServiceSv, ok := context.Get(services.CalculateCentralTrendsServiceKey)
+
+	if !ok {
+		context.JSON(500, gin.H{"message": "error getting calculate central trends service"})
+		return
+	}
+
+	calculateCentralTrendsService := calculateCentralTrendsServiceSv.(services.CalculateCentralTrends)
+
+	centralTrendsData, err := calculateCentralTrendsService.Calculate(fixedData)
+
+	if err != nil {
+		context.JSON(500, gin.H{"message": "error calculating central trends: " + err.Error()})
+		return
+	}
+
+	context.JSON(200, gin.H{"data": centralTrendsData})
 }
