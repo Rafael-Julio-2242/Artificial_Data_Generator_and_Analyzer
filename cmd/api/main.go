@@ -33,6 +33,7 @@ func main() {
 	defineVariableTypesService := services.NewDefineVariableTypesService(aiClient, ctx)
 	dataCleaningService := services.NewDataCleaningService()
 	calculateCentralTrendsService := services.NewCalculateCentralTrendsService()
+	calculateFrequenciesService := services.NewCalculateFrequenciesService()
 
 	server := httplayer.GetHttpServer(
 		middlewares.InjectFileParserMiddleware(fileParser),
@@ -40,6 +41,7 @@ func main() {
 		middlewares.InjectDefineVariableTypesMiddleware(defineVariableTypesService),
 		middlewares.InjectDataCleaningMiddleware(dataCleaningService),
 		middlewares.InjectCalculateCentralTrendsMiddleware(calculateCentralTrendsService),
+		middlewares.InjectCalculateFrequenciesMiddleware(calculateFrequenciesService),
 	)
 
 	server.Run(":8080")
