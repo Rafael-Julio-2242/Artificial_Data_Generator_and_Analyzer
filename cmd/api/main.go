@@ -29,12 +29,14 @@ func main() {
 	}
 
 	fileParser := fileops.NewFileParser()
+	csvGenerator := fileops.NewCSVGenerator()
 	defineVariableTypesService := services.NewDefineVariableTypesService(aiClient, ctx)
 	dataCleaningService := services.NewDataCleaningService()
 	calculateCentralTrendsService := services.NewCalculateCentralTrendsService()
 
 	server := httplayer.GetHttpServer(
 		middlewares.InjectFileParserMiddleware(fileParser),
+		middlewares.InjectCSVGeneratorMiddleware(csvGenerator),
 		middlewares.InjectDefineVariableTypesMiddleware(defineVariableTypesService),
 		middlewares.InjectDataCleaningMiddleware(dataCleaningService),
 		middlewares.InjectCalculateCentralTrendsMiddleware(calculateCentralTrendsService),

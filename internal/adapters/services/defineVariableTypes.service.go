@@ -82,18 +82,18 @@ func (s *DefineVariableTypesService) DefineVariableTypes(data map[string][]strin
 		case string:
 			keyValue := fmt.Sprintf("%v_type", header)
 
-			aiClassificationResponse, err := s.aiClient.Models.GenerateContent(
-				s.ctx,
-				"gemini-2.5-flash",
-				genai.Text("Que tipo de dado é esse? Responda apenas com uma das opções: Qualitativa Nominal ou Qualitativa Ordinal ?\n Dado: "+value.(string)),
-				nil,
-			)
+			// aiClassificationResponse, err := s.aiClient.Models.GenerateContent(
+			// 	s.ctx,
+			// 	"gemini-2.5-flash",
+			// 	genai.Text("Que tipo de dado é esse? Responda apenas com uma das opções: Qualitativa Nominal ou Qualitativa Ordinal ?\n Dado: "+value.(string)),
+			// 	nil,
+			// )
 
-			if err != nil {
-				return nil, err
-			}
+			// if err != nil {
+			// 	return nil, err
+			// }
 
-			textResponse := aiClassificationResponse.Text()
+			textResponse := "Qualitativa Nominal" //aiClassificationResponse.Text()
 
 			value := []any{textResponse}
 			resultData[keyValue] = value

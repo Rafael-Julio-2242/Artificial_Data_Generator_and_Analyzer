@@ -124,7 +124,8 @@ func (c *CalculateCentralTrendsService) Calculate(data map[string][]any) (map[st
 				intValue, ok := value.(int64)
 				if !ok {
 					fmt.Printf("Error on converting int value in 'Quantitativa Discreta'. header: %s - value: %v\n", header, value)
-					return nil, errors.New("error on converting int value")
+					// return nil, errors.New("error on converting int value")
+					intValue = 0
 				}
 				average += float64(intValue)
 			}
@@ -152,15 +153,15 @@ func (c *CalculateCentralTrendsService) Calculate(data map[string][]any) (map[st
 				median := sortedValues[len(sortedValues)/2]
 				data[header+"_median"] = []any{median}
 			}
-
 		case "Quantitativa Contínua": // Média
 			var average float64 = 0
 
-			for _, value := range data[header] {
+			for _, value := range data[header] { // TODO Ajustar depois. Testar com base de dados de filmes
 				floatValue, ok := value.(float64)
 				if !ok {
 					fmt.Printf("Error on converting float value in 'Quantitativa Contínua'. header: %s - value: %v\n", header, value)
-					return nil, errors.New("error on converting float value")
+					// return nil, errors.New("error on converting float value")
+					floatValue = 0
 				}
 				average += floatValue
 			}

@@ -33,7 +33,10 @@ func (d *DataCleaningService) CleanData(data map[string][]string) (map[string][]
 		var dataMapValue string = ""
 
 		for _, header := range headers {
-			dataMapValue += data[header][index] + "-"
+			if index > len(data[header]) {
+				continue
+			}
+			dataMapValue += data[header][index] + "---"
 		}
 
 		if _, ok := dataMap[dataMapValue]; ok {
@@ -46,9 +49,9 @@ func (d *DataCleaningService) CleanData(data map[string][]string) (map[string][]
 	// Terceiro passo - Popular o "result data" com os dados não duplicados armazenados como chave no dataMap
 	for valueKey := range dataMap {
 
-		valueKey = strings.TrimSuffix(valueKey, "-")
+		valueKey = strings.TrimSuffix(valueKey, "---")
 
-		values := strings.Split(valueKey, "-")
+		values := strings.Split(valueKey, "---")
 
 		for index, header := range headers {
 			resultData[header] = append(resultData[header], values[index])
@@ -62,6 +65,9 @@ func (d *DataCleaningService) CleanData(data map[string][]string) (map[string][]
 			if value == "" {
 				// Eu preciso apagar isso de todos os outros headers também
 				for _, header := range headers {
+					if index+1 > len(resultData[header]) {
+						continue
+					}
 					resultData[header] = append(resultData[header][:index], resultData[header][index+1:]...)
 				}
 			}

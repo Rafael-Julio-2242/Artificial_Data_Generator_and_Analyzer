@@ -3,16 +3,25 @@ package handlers
 import (
 	"artificial-data-analyzer-generation/internal/domain/ports"
 	"artificial-data-analyzer-generation/internal/domain/services"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 func CalculateCentralTrends(context *gin.Context) {
+	var csvReturn bool = false
+
 	fileHeader, err := context.FormFile("file")
 
 	if err != nil {
 		context.JSON(400, gin.H{"message": "file is required"})
 		return
+	}
+
+	hasCsvReturnValue := context.Query("csv")
+
+	if hasCsvReturnValue == "true" {
+		csvReturn = true
 	}
 
 	file, err := fileHeader.Open()
@@ -91,5 +100,28 @@ func CalculateCentralTrends(context *gin.Context) {
 		return
 	}
 
-	context.JSON(200, gin.H{"data": centralTrendsData})
+	if csvReturn {
+		csvGeneratorSv, ok := context.Get(ports.CSVGeneratorServiceKey)
+
+		if !ok {
+			context.JSON(500, gin.H{"message": "error getting csv generator"})
+			return
+		}
+
+		csvGenerator := csvGeneratorSv.(ports.CSVGenerator)
+
+		buf, err := csvGenerator.GenerateCSV(fixedData)
+
+		if err != nil {
+			context.JSON(500, gin.H{"message": "error generating csv: " + err.Error()})
+			return
+		}
+
+		context.Header("Content-Description", "File Transfer")
+		context.Header("Content-Disposition", `attachment; filename="export.csv"`)
+		context.Data(http.StatusOK, "text/csv", buf.Bytes())
+		return
+	}
+
+	context.JSON(http.StatusOK, gin.H{"data": centralTrendsData})
 }
